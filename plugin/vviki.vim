@@ -84,6 +84,16 @@ function! VVEnter()
 		return
 	end
 
+	" Get path from AsciiDoc 'xref' macro
+	"   xref:page.adoc[My Page]    - page
+	"   xref:page.adoc#id[My Page] - ID anchor in page
+    let l:linkpath = VVGetXref()
+	if strlen(l:linkpath) > 0
+        echom "xref:".l:linkpath
+        call VVGoPath(l:linkpath)
+		return
+	end
+
 	" Get path from AsciiDoc '<<xref#>>' macro (for AsciiDoctor export)
 	"   <<page#,My Page>>    - internal relative page
 	"   <<../page#,My Page>> - internal relative path to page
@@ -145,6 +155,13 @@ function! VVGetOLink()
 endfunction
 
 
+function! VVGetXref()
+	" Captures the <path> portion of 'xref:<path>#id[description]' (if any)
+    " \< is Vim regex for word start boundary
+    return VVGetMatchUnderCursor('\<xref:\([^[#]\+\)\(#[^[]\+\)\?\[[^]]\+\]')
+endfunction
+
+
 function! VVGetXrefHack()
 	" Captures the <path> portion of '<<<path>#,description>>' (if any)
     return VVGetMatchUnderCursor('<<\([^#]\+\)#,[^>]\+>>')
@@ -189,6 +206,8 @@ function! VVMakeLink(uri, description)
         return "link:".l:uri."[".a:description."]"
     elseif g:vviki_page_link_syntax == 'olink'
         return "olink:".l:uri."[".a:description."]"
+    elseif g:vviki_page_link_syntax == 'xref'
+        return "xref:".l:uri."[".a:description."]"
     elseif g:vviki_page_link_syntax == 'xref_hack'
         return "<<".l:uri."#,".a:description.">>"
     endif
@@ -201,6 +220,8 @@ function! VVFindNextLink()
         call search('link:.\{-1,}]')
     elseif g:vviki_page_link_syntax == 'olink'
         call search('olink:.\{-1,}]')
+    elseif g:vviki_page_link_syntax == 'xref'
+        call search('xref:.\{-1,}]')
     elseif g:vviki_page_link_syntax == 'xref_hack'
         call search('<<.\{-1,}#,.\{-1,}>>')
     endif
@@ -264,6 +285,10 @@ function! VVConcealLinks()
     elseif g:vviki_page_link_syntax == 'olink'
         syntax region vvikiLink start=/olink:/ end=/\]/ keepend
         syntax match vvikiLinkGuts /olink:[^[]\+\[/ containedin=vvikiLink contained conceal
+        syntax match vvikiLinkGuts /\]/ containedin=vvikiLink contained conceal
+    elseif g:vviki_page_link_syntax == 'xref'
+        syntax region vvikiLink start=/xref:/ end=/\]/ keepend
+        syntax match vvikiLinkGuts /xref:[^[]\+\[/ containedin=vvikiLink contained conceal
         syntax match vvikiLinkGuts /\]/ containedin=vvikiLink contained conceal
     elseif g:vviki_page_link_syntax == 'xref_hack'
         syntax region vvikiLink start=/<</ end=/>>/ keepend

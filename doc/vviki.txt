@@ -303,11 +303,12 @@ exclusively.)
 
 The available syntax options:
 
-        Syntax        | Example           | asciidoc | asciidoctor
-    ------------------+-------------------+----------+-------------
-     "link" (default) | `link:foo[My Foo]`  | foo      | foo
-     "olink"          | `olink:foo[My Foo]` |          |
-     "xref_hack"      | `<<foo#,My Foo>>`   | foo      | foo.html
+        Syntax        | Example                 | asciidoc | asciidoctor
+    ------------------+-------------------------+----------+-------------
+     "link" (default) | `link:foo[My Foo]`        | foo      | foo
+     "olink"          | `olink:foo[My Foo]`       |          |
+     "xlink"          | `xlink:foo.adoc[My Foo]`  |          | foo.html
+     "xref_hack"      | `<<foo#,My Foo>>`         | foo      | foo.html
 
 Because the need for the different syntax styles lies in the conversion of
 pages to other formats (such as HTML), the above table shows the linked page
