@@ -135,7 +135,8 @@ function! VVVisualEnter()
     let previous_register_contents = getreg('"')
     normal! gvy
     let user_selection = getreg('"')
-    call setreg('"', VVMakeLink(user_selection, user_selection))
+    let user_path = substitute(user_selection, ' ', '_', 'g')
+    call setreg('"', VVMakeLink(user_path, user_selection))
     normal! gvp
     call setreg('"', previous_register_contents)
 endfunction
