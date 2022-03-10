@@ -229,6 +229,20 @@ function! VVFindNextLink()
 endfunction
 
 
+function! VVFindPrevLink()
+    " Places cursor on next link of desired AsciiDoc syntax
+    if g:vviki_page_link_syntax == 'link'
+        call search('link:.\{-1,}]', 'b')
+    elseif g:vviki_page_link_syntax == 'olink'
+        call search('olink:.\{-1,}]', 'b')
+    elseif g:vviki_page_link_syntax == 'xref'
+        call search('xref:.\{-1,}]', 'b')
+    elseif g:vviki_page_link_syntax == 'xref_hack'
+        call search('<<.\{-1,}#,.\{-1,}>>', 'b')
+    endif
+endfunction
+
+
 function! VVGoPath(path)
     " Push current page onto history
     call add(s:history, expand("%:p"))
@@ -316,6 +330,7 @@ function! VVSetup()
     " NOTE: search() always uses 'magic' regexp mode.
     "       \{-1,} is Vim for match at least 1, non-greedy
     nnoremap <buffer><silent> <TAB> :call VVFindNextLink()<CR>
+    nnoremap <buffer><silent> <S-TAB> :call VVFindPrevLink()<CR>
 
     if g:vviki_visual_link_creation
         vnoremap <buffer><silent> <CR> :call VVVisualEnter()<CR>
