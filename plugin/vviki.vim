@@ -123,9 +123,11 @@ function! VVEnter()
 		return
 	endif
 
-	" Cursor on unlinked word - make it a link!
-    let l:new_link = VVMakeLink(l:word, l:word)
-	execute "normal! ciw".l:new_link."\<ESC>"
+	" Cursor on unlinked WORD - make it a link!
+	"   (WORD is contiguous non-whitespace)
+	let l:new_link = VVMakeLink(l:whole_word, l:whole_word)
+	"cursor may not be at the beginning
+	execute "normal! BcE".l:new_link."\<ESC>"
 endfunction
 
 
