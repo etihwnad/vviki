@@ -272,7 +272,22 @@ function! VVGoPath(path)
 
     let l:fname = fnameescape(l:fname)
 
-    execute "edit ".l:fname
+    if filereadable(l:fname)
+        execute "edit ".l:fname
+    else
+        " This is a new file, create from a template and begin editing
+        let l:tname = g:vviki_root."/template".g:vviki_ext
+        execute "edit ".l:fname
+        " uses external tool GPP (https://logological.org/gpp)
+        " vaugely CPP-like defaults
+        " would be better to not require extra install for this feature,
+        " but this is my expedient solution at the moment...
+        execute "silent 0r! gpp -DTITLE=".a:path." -DCREATED=".strftime('%Y-%m-%d')." ".l:tname
+        " open folds because (my) ADOC defaults to all folds closed, and I'm
+        " likely to want to edit the header immediately
+        execute "foldopen"
+        call cursor(1, 3)
+    endif
 endfunction
 
 
