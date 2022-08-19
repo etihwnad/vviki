@@ -144,6 +144,29 @@ function! VVVisualEnter()
 endfunction
 
 
+function! VVAdocSectid(word)
+    let l:word = "_".a:word
+
+    let l:word = tolower(l:word)
+    let l:word = substitute(l:word, "[^a-z0-9-]", "_", "")
+    let l:word = substitute(l:word, "__+", "_", "")
+    return l:word
+endfunction
+
+
+function! VVMakeGlossaryLink()
+    let l:whole_word = expand("<cWORD>") " selects all non-whitespace chars
+    let l:word = expand("<cword>") " selects only 'word' chars
+
+    " Cursor on unlinked WORD - make it a link!
+    "   (WORD is contiguous non-whitespace)
+    let l:new_link = VVMakeLinkAnchor(VVAdocSectid(l:whole_word), ":".l:whole_word)
+    "cursor may not be at the beginning
+    execute "normal! BcE".l:new_link."\<ESC>"
+endfunction
+
+
+
 function! VVGetLink()
 	" Captures the <path> portion of 'link:<path>[description]' (if any)
     " \< is Vim regex for word start boundary
@@ -195,6 +218,26 @@ function! VVGetMatchUnderCursor(matchrx)
 			return l:matched[1]
         endif
     endwhile
+endfunction
+
+
+function! VVMakeLinkAnchor(anchor, description)
+    " Returns string with link of desired AsciiDoc syntax 'style'
+    let l:uri = g:vviki_glossary_doc
+    if g:vviki_links_include_ext
+        " Attach the wiki file extension to the link URI
+        let l:uri = l:uri.g:vviki_ext
+    endif
+    let l:uri = l:uri."#".a:anchor
+    if g:vviki_page_link_syntax == 'link'
+        return "link:".l:uri."[".a:description."]"
+    elseif g:vviki_page_link_syntax == 'olink'
+        return "olink:".l:uri."[".a:description."]"
+    elseif g:vviki_page_link_syntax == 'xref'
+        return "xref:".l:uri."[".a:description."]"
+    elseif g:vviki_page_link_syntax == 'xref_hack'
+        return "<<".l:uri."#,".a:description.">>"
+    endif
 endfunction
 
 
@@ -348,6 +391,8 @@ function! VVSetup()
     "       \{-1,} is Vim for match at least 1, non-greedy
     nnoremap <buffer><silent> <TAB> :call VVFindNextLink()<CR>
     nnoremap <buffer><silent> <S-TAB> :call VVFindPrevLink()<CR>
+
+    nnoremap <leader>wg :call VVMakeGlossaryLink()<CR>
 
     if g:vviki_visual_link_creation
         vnoremap <buffer><silent> <CR> :call VVVisualEnter()<CR>
